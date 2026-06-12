@@ -15,8 +15,34 @@ export const UserIdentification = ({ isOpen, onClose, onSuccess }: UserIdentific
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isNewUser, setIsNewUser] = useState(false);
-
+  const [isNewUser, setIsNewUser] = useState(false);              
+  //validate email address
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+        toast.success('User identified successfully!');
+        onSuccess();
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error identifying user:', error);
+      toast.error('Failed to identify user. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+        toast.success('User identified successfully!');
+        onSuccess();
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error identifying user:', error);
+      toast.error('Failed to identify user. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
