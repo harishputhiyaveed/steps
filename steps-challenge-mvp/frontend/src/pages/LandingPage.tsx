@@ -50,11 +50,11 @@ const LandingPage: React.FC = () => {
 
       {/* Main */}
       <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '5%', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '5%', alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
           {/* LEFT — poster card */}
-          <div style={{ width: '50%', flexShrink: 0 }}>
-            <div style={{ backgroundColor: WHITE, borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '600px' }}>
+          <div style={{ width: '100%', minWidth: '280px', flex: '1 1 400px' }}>
+            <div style={{ backgroundColor: WHITE, borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '400px' }}>
 
               {/* Title */}
               <div style={{ textAlign: 'center', marginBottom: '20px' }}>
@@ -101,7 +101,7 @@ const LandingPage: React.FC = () => {
           </div>
 
           {/* RIGHT — auth form + leaderboards */}
-          <div style={{ width: '45%', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ flex: '1 1 340px', minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {authView === 'register' ? (
               <RegisterForm onSwitchToLogin={() => setAuthView('login')} />
             ) : (

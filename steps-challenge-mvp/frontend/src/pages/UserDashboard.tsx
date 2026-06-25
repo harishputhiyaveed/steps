@@ -53,11 +53,11 @@ const UserDashboard: React.FC = () => {
 
       {/* Main — two column layout matching landing page */}
       <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '5%', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '5%', alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
           {/* LEFT — poster + welcome (same as landing page) */}
-          <div style={{ width: '50%', flexShrink: 0 }}>
-            <div style={{ backgroundColor: WHITE, borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '600px' }}>
+          <div style={{ flex: '1 1 400px', minWidth: '280px' }}>
+            <div style={{ backgroundColor: WHITE, borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '400px' }}>
               <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#000000', margin: 0 }}>🏃 Steps Challenge</h2>
                 <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '8px' }}>Track your steps and compete with your team!</p>
@@ -69,7 +69,7 @@ const UserDashboard: React.FC = () => {
           </div>
 
           {/* RIGHT — forms + leaderboards */}
-          <div style={{ width: '45%', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ flex: '1 1 340px', minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <StepEntryForm onSuccess={handleStepAdded} />
             <UserStats refreshTrigger={refreshTrigger} />
             <LeaderboardTable type="users" autoRefresh={true} refreshInterval={60000} refreshTrigger={refreshTrigger} />
