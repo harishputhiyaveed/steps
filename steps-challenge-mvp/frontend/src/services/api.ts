@@ -13,7 +13,7 @@ import type {
   AdminStats,
 } from '../types';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = 'https://steps-production.up.railway.app';
 
 // Create axios instance
 const api = axios.create({
