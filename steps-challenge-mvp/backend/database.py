@@ -9,9 +9,11 @@ SQLALCHEMY_DATABASE_URL = os.environ.get(
     "sqlite:///./steps_challenge.db"
 )
 
-# Railway sets DATABASE_URL starting with "postgres://", SQLAlchemy needs "postgresql://"
+# Railway sets DATABASE_URL starting with "postgres://", SQLAlchemy needs "postgresql+psycopg://"
 if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
-    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif SQLALCHEMY_DATABASE_URL.startswith("postgresql://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
 # Create engine — SQLite needs check_same_thread, PostgreSQL doesn't
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
