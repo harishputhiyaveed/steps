@@ -45,22 +45,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Steps Challenge API", version="1.0.0", lifespan=lifespan)
 
 
-# ONE-TIME ADMIN SETUP — remove after use
-@app.post("/api/setup-admin")
-def setup_admin(db: Session = Depends(get_db)):
-    existing = db.query(models.User).filter(models.User.email == "admin@test.ibm.com").first()
-    if existing:
-        existing.password_hash = auth.get_password_hash("realworld123")
-        existing.is_admin = True
-        existing.is_approved = True
-        db.commit()
-        return {"message": "Admin password reset"}
-    hashed = auth.get_password_hash("realworld123")
-    db.add(models.User(full_name="Admin", email="admin@test.ibm.com", password_hash=hashed, team_name="1", is_admin=True, is_approved=True))
-    db.commit()
-    return {"message": "Admin created"}
-
-
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
