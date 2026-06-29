@@ -4,34 +4,39 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, text
 from datetime import timedelta
 from typing import List
+import time
 import models
 import schemas
 import auth
 import admin
 from database import engine, get_db
 
-# Create database tables
-models.Base.metadata.create_all(bind=engine)
-
-# Run safe migrations for any new columns added after initial deploy
-def run_migrations():
-    try:
-        with engine.connect() as conn:
-            conn.execute(text(
-                "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_approved BOOLEAN NOT NULL DEFAULT FALSE"
-            ))
-            conn.execute(text(
-                "UPDATE users SET is_approved = TRUE WHERE is_admin = TRUE AND is_approved = FALSE"
-            ))
-            conn.commit()
-        print("Migrations completed successfully")
-    except Exception as e:
-        print(f"Migration warning (non-fatal): {e}")
-
-run_migrations()
-
 # Initialize FastAPI app
 app = FastAPI(title="Steps Challenge API", version="1.0.0")
+
+
+@app.on_event("startup")
+def startup():
+    # Retry DB connection up to 5 times (Railway PostgreSQL can take a moment)
+    for attempt in range(5):
+        try:
+            models.Base.metadata.create_all(bind=engine)
+            with engine.connect() as conn:
+                conn.execute(text(
+                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_approved BOOLEAN NOT NULL DEFAULT FALSE"
+                ))
+                conn.execute(text(
+                    "UPDATE users SET is_approved = TRUE WHERE is_admin = TRUE AND is_approved = FALSE"
+                ))
+                conn.commit()
+            print("DB init and migrations completed successfully")
+            break
+        except Exception as e:
+            print(f"DB init attempt {attempt + 1} failed: {e}")
+            if attempt < 4:
+                time.sleep(3)
+            else:
+                print("DB init failed after 5 attempts — app will still start")
 
 
 # Configure CORS
