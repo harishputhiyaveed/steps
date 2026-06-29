@@ -151,7 +151,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
 
         <div>
           <label htmlFor="email" style={labelStyle}>Email Address</label>
-          <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required style={inputStyle} placeholder="Enter your IBM or Merative email" />
+          <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required style={inputStyle} placeholder="Enter your email address" />
         </div>
 
         <div>
