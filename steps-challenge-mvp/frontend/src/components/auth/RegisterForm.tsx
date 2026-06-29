@@ -82,7 +82,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
     if (!formData.team_name) { setError('Please select a team'); return; }
     const emailLower = formData.email.toLowerCase();
     if (!emailLower.includes('merative') && !emailLower.includes('ibm')) {
-      setError('Registration is only open to Merative or IBM email addresses');
+      setError('Please enter a valid email address');
       return;
     }
     setLoading(true);

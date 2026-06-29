@@ -59,7 +59,7 @@ def register(user_data: schemas.UserRegister, db: Session = Depends(get_db)):
     if 'merative' not in email_lower and 'ibm' not in email_lower:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Registration is only open to Merative or IBM email addresses"
+            detail="Please enter a valid email address"
         )
 
     # Check if email already exists
