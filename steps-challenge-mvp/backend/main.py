@@ -1,8 +1,7 @@
-# Force reload
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 from datetime import timedelta
 from typing import List
 import models
@@ -13,6 +12,19 @@ from database import engine, get_db
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
+
+# Run safe migrations for any new columns added after initial deploy
+def run_migrations():
+    with engine.connect() as conn:
+        conn.execute(text(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_approved BOOLEAN NOT NULL DEFAULT FALSE"
+        ))
+        conn.execute(text(
+            "UPDATE users SET is_approved = TRUE WHERE is_admin = TRUE AND is_approved = FALSE"
+        ))
+        conn.commit()
+
+run_migrations()
 
 # Initialize FastAPI app
 app = FastAPI(title="Steps Challenge API", version="1.0.0")
