@@ -153,7 +153,11 @@ def get_admin_stats(
         "total_users": total_users,
         "total_steps": total_steps,
         "total_entries": total_entries,
-        "teams": ["1", "2", "3"]
+        "teams": [
+            "Overarching", "Release and DevOps", "Notifications",
+            "Cloud Hosting", "Shared Services", "ECNS", "PAWHP",
+            "Data", "CSP Legacy", "Not Listed",
+        ]
     }
 
 # Made with Bob

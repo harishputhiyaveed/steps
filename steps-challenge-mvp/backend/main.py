@@ -341,9 +341,16 @@ def get_available_teams():
     """Get list of available teams (hardcoded for MVP)"""
     return {
         "teams": [
-            "1",
-            "2",
-            "3"
+            "Overarching",
+            "Release and DevOps",
+            "Notifications",
+            "Cloud Hosting",
+            "Shared Services",
+            "ECNS",
+            "PAWHP",
+            "Data",
+            "CSP Legacy",
+            "Not Listed",
         ]
     }
 
