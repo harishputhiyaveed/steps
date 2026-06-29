@@ -15,12 +15,17 @@ const PURPLE = '#4B3B8C';
 const BLACK = '#000000';
 const WHITE = '#ffffff';
 
+const TrophyIcon: React.FC<{ color: string }> = ({ color }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill={color}>
+    <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0011 15.9V18H9v2h6v-2h-2v-2.1a5.01 5.01 0 003.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z" />
+  </svg>
+);
+
 const RankBadge: React.FC<{ rank: number }> = ({ rank }) => {
-  const num = <span style={{ fontWeight: 600, color: BLACK }}>{rank}</span>;
-  if (rank === 1) return <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontSize: '1.2rem', color: '#F59E0B' }}>🏆</span>{num}</span>;
-  if (rank === 2) return <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontSize: '1.2rem', color: '#9CA3AF' }}>🏆</span>{num}</span>;
-  if (rank === 3) return <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontSize: '1.2rem', color: '#CD7F32' }}>🏆</span>{num}</span>;
-  return <span style={{ fontWeight: 600, color: BLACK }}>{rank}</span>;
+  if (rank === 1) return <TrophyIcon color="#F59E0B" />;
+  if (rank === 2) return <TrophyIcon color="#9CA3AF" />;
+  if (rank === 3) return <TrophyIcon color="#CD7F32" />;
+  return <span style={{ fontWeight: 600, fontSize: '0.95rem', color: BLACK }}>{rank}</span>;
 };
 
 const RefreshIcon: React.FC = () => (
@@ -85,9 +90,9 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', backgroundColor: PURPLE }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: WHITE, margin: 0 }}>{title}</h2>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: WHITE, margin: 0 }}>{title}</h2>
         {autoRefresh && (
-          <span style={{ fontSize: '0.875rem', color: WHITE, opacity: 0.9, display: 'flex', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.8rem', color: WHITE, opacity: 0.9, display: 'flex', alignItems: 'center', gap: '4px' }}>
             Auto-refresh in {countdown}s <RefreshIcon />
           </span>
         )}
@@ -97,10 +102,10 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
       <div style={{ backgroundColor: WHITE }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-              <th style={{ textAlign: 'left', padding: '12px 20px', fontSize: '0.875rem', fontWeight: 600, color: BLACK, width: '80px' }}>Rank</th>
-              <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: '0.875rem', fontWeight: 600, color: BLACK }}>{nameHeader}</th>
-              <th style={{ textAlign: 'right', padding: '12px 20px', fontSize: '0.875rem', fontWeight: 600, color: BLACK }}>Steps</th>
+            <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+              <th style={{ textAlign: 'left', padding: '10px 20px', fontSize: '0.875rem', fontWeight: 700, color: BLACK, width: '70px' }}>Rank</th>
+              <th style={{ textAlign: 'left', padding: '10px 16px', fontSize: '0.875rem', fontWeight: 700, color: BLACK }}>{nameHeader}</th>
+              <th style={{ textAlign: 'right', padding: '10px 20px', fontSize: '0.875rem', fontWeight: 700, color: BLACK }}>Steps</th>
             </tr>
           </thead>
           <tbody>
@@ -114,15 +119,15 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
               rows.map((entry, i) => (
                 <tr
                   key={type === 'users' ? (entry as UserLeaderboardEntry).user_id : (entry as TeamLeaderboardEntry).team_name}
-                  style={{ borderBottom: i < rows.length - 1 ? '1px solid #f3f4f6' : 'none' }}
+                  style={{ borderBottom: '1px solid #f3f4f6' }}
                 >
-                  <td style={{ padding: '12px 20px', width: '80px' }}>
+                  <td style={{ padding: '10px 20px', width: '70px', verticalAlign: 'middle' }}>
                     <RankBadge rank={entry.rank} />
                   </td>
-                  <td style={{ padding: '12px 16px', fontSize: '0.875rem', color: BLACK }}>
+                  <td style={{ padding: '10px 16px', fontSize: '0.9rem', fontWeight: 500, color: BLACK, verticalAlign: 'middle' }}>
                     {type === 'users' ? (entry as UserLeaderboardEntry).full_name : (entry as TeamLeaderboardEntry).team_name}
                   </td>
-                  <td style={{ padding: '12px 20px', textAlign: 'right', fontSize: '0.875rem', fontWeight: 600, color: BLACK }}>
+                  <td style={{ padding: '10px 20px', textAlign: 'right', fontSize: '0.9rem', fontWeight: 600, color: BLACK, verticalAlign: 'middle' }}>
                     {formatNumber(entry.total_steps)}
                   </td>
                 </tr>
@@ -130,6 +135,13 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* View Full Leaderboard link */}
+      <div style={{ borderTop: '1px solid #e5e7eb', padding: '14px 20px', textAlign: 'center', backgroundColor: WHITE }}>
+        <span style={{ color: PURPLE, fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>
+          View Full Leaderboard
+        </span>
       </div>
     </div>
   );
