@@ -13,6 +13,7 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     team_name = Column(String, nullable=False)
     is_admin = Column(Boolean, default=False, nullable=False)
+    is_approved = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationship to step entries

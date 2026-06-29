@@ -54,8 +54,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
   const { register } = useAuth();
 
   useEffect(() => {
@@ -77,20 +77,51 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
     if (formData.password !== formData.confirmPassword) { setError('Passwords do not match'); return; }
     if (formData.password.length < 6) { setError('Password must be at least 6 characters'); return; }
     if (!formData.team_name) { setError('Please select a team'); return; }
+    const emailLower = formData.email.toLowerCase();
+    if (!emailLower.includes('merative') && !emailLower.includes('ibm')) {
+      setError('Registration is only open to Merative or IBM email addresses');
+      return;
+    }
     setLoading(true);
     try {
       await register({ full_name: formData.full_name, email: formData.email, team_name: formData.team_name, password: formData.password });
-      setSuccess('Registration successful! Redirecting to dashboard…');
     } catch (err: any) {
-      setError(err.message || 'Registration failed');
+      if (err.message === 'PENDING_APPROVAL') {
+        setRegistered(true);
+      } else {
+        setError(err.message || 'Registration failed');
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  if (registered) {
+    return (
+      <div style={{ backgroundColor: WHITE, borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: '40px 32px', width: '100%', boxSizing: 'border-box', textAlign: 'center' }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#059669" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: BLACK, margin: '0 0 12px' }}>Registration Submitted!</h2>
+        <p style={{ fontSize: '0.9rem', color: '#374151', margin: '0 0 8px', lineHeight: 1.6 }}>
+          Your account for <strong>{formData.email}</strong> has been created and is now <strong>pending admin approval</strong>.
+        </p>
+        <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 28px', lineHeight: 1.6 }}>
+          You'll be able to log in once an admin approves your account. This usually happens within 24 hours.
+        </p>
+        {onSwitchToLogin && (
+          <button onClick={onSwitchToLogin} style={{ backgroundColor: PURPLE, color: WHITE, padding: '12px 32px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600 }}>
+            Back to Login
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: WHITE, borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: '32px', width: '100%', boxSizing: 'border-box' }}>
@@ -112,11 +143,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
             {error}
           </div>
         )}
-        {success && (
-          <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', color: '#15803d', padding: '12px 16px', borderRadius: '12px', fontSize: '0.875rem' }}>
-            {success}
-          </div>
-        )}
 
         <div>
           <label htmlFor="full_name" style={labelStyle}>Full Name</label>
@@ -125,7 +151,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin }) => {
 
         <div>
           <label htmlFor="email" style={labelStyle}>Email Address</label>
-          <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required style={inputStyle} placeholder="Enter your email address" />
+          <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required style={inputStyle} placeholder="Enter your IBM or Merative email" />
         </div>
 
         <div>

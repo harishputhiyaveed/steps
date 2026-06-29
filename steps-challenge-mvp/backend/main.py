@@ -42,6 +42,14 @@ app.include_router(admin.router)
 @app.post("/api/auth/register", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user_data: schemas.UserRegister, db: Session = Depends(get_db)):
     """Register a new user"""
+    # Check email domain is Merative or IBM
+    email_lower = user_data.email.lower()
+    if 'merative' not in email_lower and 'ibm' not in email_lower:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Registration is only open to Merative or IBM email addresses"
+        )
+
     # Check if email already exists
     existing_user = auth.get_user_by_email(db, user_data.email)
     if existing_user:
@@ -67,25 +75,22 @@ def register(user_data: schemas.UserRegister, db: Session = Depends(get_db)):
 @app.post("/api/auth/login", response_model=schemas.Token)
 def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
     """Login and get access token"""
-    # Debug logging
-    print(f"\n=== LOGIN ATTEMPT ===")
-    print(f"Email: '{user_credentials.email}'")
-    print(f"Password length: {len(user_credentials.password)}")
-    print(f"Password: '{user_credentials.password}'")
-    
     user = auth.authenticate_user(db, user_credentials.email, user_credentials.password)
-    print(f"Authentication result: {user is not False}")
-    if user:
-        print(f"User found: {user.email}, is_admin: {user.is_admin}")
-    print(f"====================\n")
-    
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password. Please try again.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
+    # Block unapproved non-admin users
+    if not user.is_admin and not user.is_approved:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your account is pending admin approval. Please check back soon.",
+        )
+
     # Create access token
     access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = auth.create_access_token(
@@ -97,27 +102,16 @@ def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
 @app.get("/api/auth/me", response_model=schemas.UserResponse)
 def get_current_user_info(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(get_db)):
     """Get current user information"""
-    # Refresh the user object from database to ensure all fields are loaded
     db.refresh(current_user)
-    
-    print(f"\n=== /api/auth/me ===")
-    print(f"User: {current_user.email}")
-    print(f"is_admin: {current_user.is_admin}")
-    print(f"Type: {type(current_user.is_admin)}")
-    
-    # Create response dict explicitly to ensure is_admin is included
-    response_data = {
+    return {
         "id": current_user.id,
         "full_name": current_user.full_name,
         "email": current_user.email,
         "team_name": current_user.team_name,
         "is_admin": current_user.is_admin,
+        "is_approved": current_user.is_approved,
         "created_at": current_user.created_at
     }
-    print(f"Response data: {response_data}")
-    print(f"====================\n")
-    
-    return response_data
 
 
 # ============================================================================

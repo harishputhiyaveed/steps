@@ -22,6 +22,7 @@ class UserResponse(BaseModel):
     email: str
     team_name: str
     is_admin: bool
+    is_approved: bool
     created_at: datetime
 
     class Config:
@@ -34,6 +35,7 @@ class AdminUserResponse(BaseModel):
     email: str
     team_name: str
     is_admin: bool
+    is_approved: bool
     created_at: datetime
     total_steps: int
 

@@ -107,6 +107,15 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleApproveUser = async (userId: number, userName: string) => {
+    try {
+      await adminAPI.approveUser(userId);
+      await fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || 'Failed to approve user');
+    }
+  };
+
   const handleDeleteUser = async (userId: number, userName: string) => {
     if (!confirm(`Are you sure you want to delete user "${userName}"? This will also delete all their step entries.`)) return;
     try {
@@ -124,8 +133,11 @@ const AdminDashboard: React.FC = () => {
     setUserEntries([]);
   };
 
+  const pendingUsers = users.filter(u => !u.is_approved && !u.is_admin);
+
   const filteredAndSortedUsers = users
     .filter(u => {
+      if (!u.is_approved && !u.is_admin) return false; // hide pending from main table
       const matchesSearch = u.full_name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesTeam = filterTeam === 'all' || u.team_name === filterTeam;
       return matchesSearch && matchesTeam;
@@ -207,6 +219,57 @@ const AdminDashboard: React.FC = () => {
               </div>
             )}
 
+            {/* Pending Approvals */}
+            {pendingUsers.length > 0 && (
+              <div style={{ backgroundColor: WHITE, borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', overflow: 'hidden', border: '2px solid #f59e0b' }}>
+                <div style={{ padding: '16px 20px', backgroundColor: '#f59e0b', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={WHITE} strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                  <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: WHITE, margin: 0 }}>
+                    Pending Approval ({pendingUsers.length})
+                  </h2>
+                </div>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        <th style={thStyle}>Name</th>
+                        <th style={thStyle}>Email</th>
+                        <th style={thStyle}>Team</th>
+                        <th style={thStyle}>Registered</th>
+                        <th style={thStyle}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pendingUsers.map((u) => (
+                        <tr key={u.id} style={{ backgroundColor: '#fffbeb' }}>
+                          <td style={{ ...tdStyle, fontWeight: 600 }}>{u.full_name}</td>
+                          <td style={{ ...tdStyle, color: '#6b7280' }}>{u.email}</td>
+                          <td style={tdStyle}>{u.team_name}</td>
+                          <td style={{ ...tdStyle, color: '#6b7280' }}>{new Date(u.created_at).toLocaleDateString()}</td>
+                          <td style={tdStyle}>
+                            <button
+                              onClick={() => handleApproveUser(u.id, u.full_name)}
+                              style={{ backgroundColor: '#059669', color: WHITE, padding: '6px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', marginRight: '8px' }}
+                            >
+                              ✓ Approve
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(u.id, u.full_name)}
+                              style={{ color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem' }}
+                            >
+                              Reject
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             {/* Filters */}
             <div style={{ backgroundColor: WHITE, borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', overflow: 'hidden' }}>
               <div style={{ padding: '16px 20px', backgroundColor: PURPLE }}>
@@ -259,7 +322,8 @@ const AdminDashboard: React.FC = () => {
                       <th style={thStyle}>Team</th>
                       <th style={thStyle}>Total Steps</th>
                       <th style={thStyle}>Role</th>
-                      <th style={thStyle}>Actions</th>
+                       <th style={thStyle}>Status</th>
+                       <th style={thStyle}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -273,6 +337,11 @@ const AdminDashboard: React.FC = () => {
                         <td style={tdStyle}>
                           <span style={{ padding: '3px 10px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, backgroundColor: u.is_admin ? '#ede9fe' : '#f3f4f6', color: u.is_admin ? PURPLE : '#374151' }}>
                             {u.is_admin ? 'Admin' : 'User'}
+                          </span>
+                        </td>
+                        <td style={tdStyle}>
+                          <span style={{ padding: '3px 10px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, backgroundColor: u.is_approved || u.is_admin ? '#d1fae5' : '#fef3c7', color: u.is_approved || u.is_admin ? '#065f46' : '#92400e' }}>
+                            {u.is_approved || u.is_admin ? 'Approved' : 'Pending'}
                           </span>
                         </td>
                         <td style={tdStyle}>

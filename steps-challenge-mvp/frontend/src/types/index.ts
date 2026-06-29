@@ -5,6 +5,7 @@ export interface User {
   email: string;
   team_name: string;
   is_admin: boolean;
+  is_approved: boolean;
   created_at: string;
 }
 
@@ -14,6 +15,7 @@ export interface AdminUser {
   email: string;
   team_name: string;
   is_admin: boolean;
+  is_approved: boolean;
   created_at: string;
   total_steps: number;
 }

@@ -108,6 +108,10 @@ export const adminAPI = {
     return response.data;
   },
 
+  approveUser: async (userId: number): Promise<void> => {
+    await api.post(`/api/admin/users/${userId}/approve`);
+  },
+
   deleteUser: async (userId: number): Promise<void> => {
     await api.delete(`/api/admin/users/${userId}`);
   },

@@ -30,7 +30,7 @@ def get_all_users(
         models.User,
         func.coalesce(func.sum(models.StepEntry.steps), 0).label("total_steps")
     ).outerjoin(models.StepEntry).group_by(models.User.id).all()
-    
+
     return [
         {
             "id": user.id,
@@ -38,11 +38,30 @@ def get_all_users(
             "email": user.email,
             "team_name": user.team_name,
             "is_admin": user.is_admin,
+            "is_approved": user.is_approved,
             "created_at": user.created_at,
             "total_steps": total_steps
         }
         for user, total_steps in users
     ]
+
+
+@router.post("/users/{user_id}/approve")
+def approve_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(require_admin)
+):
+    """Approve a user registration (admin only)"""
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    user.is_approved = True
+    db.commit()
+    return {"message": f"User {user.full_name} approved successfully"}
 
 
 @router.delete("/users/{user_id}")

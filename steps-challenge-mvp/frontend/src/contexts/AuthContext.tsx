@@ -69,12 +69,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (userData: UserRegister) => {
     try {
-      // Register user
       await authAPI.register(userData);
-      
-      // Auto-login after registration
-      await login(userData.email, userData.password);
+      // Do NOT auto-login — account needs admin approval first
+      throw new Error('PENDING_APPROVAL');
     } catch (error: any) {
+      if (error.message === 'PENDING_APPROVAL') throw error;
       console.error('Registration failed:', error);
       throw new Error(error.response?.data?.detail || 'Registration failed');
     }
