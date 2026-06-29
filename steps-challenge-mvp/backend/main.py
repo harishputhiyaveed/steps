@@ -33,6 +33,30 @@ run_migrations()
 # Initialize FastAPI app
 app = FastAPI(title="Steps Challenge API", version="1.0.0")
 
+
+# ============================================================================
+# ONE-TIME ADMIN SETUP — remove after use
+# ============================================================================
+
+@app.post("/api/setup-admin")
+def setup_admin(db: Session = Depends(get_db)):
+    """One-time endpoint to create the admin user. Will be removed after use."""
+    existing = auth.get_user_by_email(db, "admin@test.ibm.com")
+    if existing:
+        return {"message": "Admin already exists"}
+    hashed = auth.get_password_hash("realworld123")
+    admin_user = models.User(
+        full_name="Admin",
+        email="admin@test.ibm.com",
+        password_hash=hashed,
+        team_name="1",
+        is_admin=True,
+        is_approved=True,
+    )
+    db.add(admin_user)
+    db.commit()
+    return {"message": "Admin created successfully"}
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
