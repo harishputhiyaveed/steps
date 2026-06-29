@@ -105,16 +105,19 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
             <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
               <th style={{ textAlign: 'left', padding: '10px 20px', fontSize: '0.875rem', fontWeight: 700, color: BLACK, width: '70px' }}>Rank</th>
               <th style={{ textAlign: 'left', padding: '10px 16px', fontSize: '0.875rem', fontWeight: 700, color: BLACK }}>{nameHeader}</th>
+              {type === 'teams' && (
+                <th style={{ textAlign: 'right', padding: '10px 16px', fontSize: '0.875rem', fontWeight: 700, color: BLACK }}>Active Members</th>
+              )}
               <th style={{ textAlign: 'right', padding: '10px 20px', fontSize: '0.875rem', fontWeight: 700, color: BLACK }}>Steps</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={3} style={{ textAlign: 'center', padding: '40px', color: '#9ca3af', fontSize: '0.875rem' }}>Loading…</td></tr>
+              <tr><td colSpan={type === 'teams' ? 4 : 3} style={{ textAlign: 'center', padding: '40px', color: '#9ca3af', fontSize: '0.875rem' }}>Loading…</td></tr>
             ) : error ? (
-              <tr><td colSpan={3} style={{ textAlign: 'center', padding: '40px', color: '#ef4444', fontSize: '0.875rem' }}>{error}</td></tr>
+              <tr><td colSpan={type === 'teams' ? 4 : 3} style={{ textAlign: 'center', padding: '40px', color: '#ef4444', fontSize: '0.875rem' }}>{error}</td></tr>
             ) : rows.length === 0 ? (
-              <tr><td colSpan={3} style={{ textAlign: 'center', padding: '40px', color: '#9ca3af', fontSize: '0.875rem' }}>No data available</td></tr>
+              <tr><td colSpan={type === 'teams' ? 4 : 3} style={{ textAlign: 'center', padding: '40px', color: '#9ca3af', fontSize: '0.875rem' }}>No data available</td></tr>
             ) : (
               rows.map((entry, i) => (
                 <tr
@@ -127,6 +130,11 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                   <td style={{ padding: '10px 16px', fontSize: '0.9rem', fontWeight: 500, color: BLACK, verticalAlign: 'middle' }}>
                     {type === 'users' ? (entry as UserLeaderboardEntry).full_name : (entry as TeamLeaderboardEntry).team_name}
                   </td>
+                  {type === 'teams' && (
+                    <td style={{ padding: '10px 16px', textAlign: 'right', fontSize: '0.9rem', fontWeight: 500, color: '#6b7280', verticalAlign: 'middle' }}>
+                      {(entry as TeamLeaderboardEntry).active_members}
+                    </td>
+                  )}
                   <td style={{ padding: '10px 20px', textAlign: 'right', fontSize: '0.9rem', fontWeight: 600, color: BLACK, verticalAlign: 'middle' }}>
                     {formatNumber(entry.total_steps)}
                   </td>

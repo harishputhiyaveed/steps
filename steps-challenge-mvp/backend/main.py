@@ -258,24 +258,24 @@ def get_user_leaderboard(db: Session = Depends(get_db)):
 @app.get("/api/leaderboards/teams", response_model=List[schemas.TeamLeaderboardEntry])
 def get_team_leaderboard(db: Session = Depends(get_db)):
     """Get team leaderboard"""
-    # Calculate total steps per team
     team_totals = db.query(
         models.User.team_name,
-        func.coalesce(func.sum(models.StepEntry.steps), 0).label('total_steps')
+        func.coalesce(func.sum(models.StepEntry.steps), 0).label('total_steps'),
+        func.count(func.distinct(models.StepEntry.user_id)).label('active_members')
     ).outerjoin(models.StepEntry)\
      .group_by(models.User.team_name)\
      .order_by(func.coalesce(func.sum(models.StepEntry.steps), 0).desc())\
      .all()
-    
-    # Add rank
+
     leaderboard = []
-    for rank, (team_name, total_steps) in enumerate(team_totals, start=1):
+    for rank, (team_name, total_steps, active_members) in enumerate(team_totals, start=1):
         leaderboard.append(schemas.TeamLeaderboardEntry(
             rank=rank,
             team_name=team_name,
-            total_steps=total_steps
+            total_steps=total_steps,
+            active_members=active_members
         ))
-    
+
     return leaderboard
 
 

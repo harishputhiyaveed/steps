@@ -82,6 +82,7 @@ class TeamLeaderboardEntry(BaseModel):
     rank: int
     team_name: str
     total_steps: int
+    active_members: int
 
 
 class UserStats(BaseModel):

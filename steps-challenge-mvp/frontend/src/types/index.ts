@@ -71,6 +71,7 @@ export interface TeamLeaderboardEntry {
   rank: number;
   team_name: string;
   total_steps: number;
+  active_members: number;
 }
 
 // User Stats
