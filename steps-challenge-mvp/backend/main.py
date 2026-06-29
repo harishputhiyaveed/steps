@@ -55,6 +55,7 @@ app.add_middleware(
         "https://steps-tan-ten.vercel.app",
         "https://steps-hs23.vercel.app",
         "https://charirty-steps.vercel.app",
+        "https://charity-steps.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
