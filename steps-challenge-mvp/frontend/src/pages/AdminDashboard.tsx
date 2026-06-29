@@ -107,7 +107,7 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleApproveUser = async (userId: number, userName: string) => {
+  const handleApproveUser = async (userId: number, _userName: string) => {
     try {
       await adminAPI.approveUser(userId);
       await fetchData();

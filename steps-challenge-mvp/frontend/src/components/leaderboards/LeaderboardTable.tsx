@@ -119,7 +119,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
             ) : rows.length === 0 ? (
               <tr><td colSpan={type === 'teams' ? 4 : 3} style={{ textAlign: 'center', padding: '40px', color: '#9ca3af', fontSize: '0.875rem' }}>No data available</td></tr>
             ) : (
-              rows.map((entry, i) => (
+              rows.map((entry) => (
                 <tr
                   key={type === 'users' ? (entry as UserLeaderboardEntry).user_id : (entry as TeamLeaderboardEntry).team_name}
                   style={{ borderBottom: '1px solid #f3f4f6' }}
