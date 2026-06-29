@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func, text
+from contextlib import asynccontextmanager
 from datetime import timedelta
 from typing import List
 import time
@@ -11,13 +12,9 @@ import auth
 import admin
 from database import engine, get_db
 
-# Initialize FastAPI app
-app = FastAPI(title="Steps Challenge API", version="1.0.0")
 
-
-@app.on_event("startup")
-def startup():
-    # Retry DB connection up to 5 times (Railway PostgreSQL can take a moment)
+def init_db():
+    # Retry DB connection up to 5 times (Railway PostgreSQL can take a moment to be ready)
     for attempt in range(5):
         try:
             models.Base.metadata.create_all(bind=engine)
@@ -30,13 +27,22 @@ def startup():
                 ))
                 conn.commit()
             print("DB init and migrations completed successfully")
-            break
+            return
         except Exception as e:
             print(f"DB init attempt {attempt + 1} failed: {e}")
             if attempt < 4:
                 time.sleep(3)
-            else:
-                print("DB init failed after 5 attempts — app will still start")
+    print("DB init failed after 5 attempts — continuing anyway")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+# Initialize FastAPI app
+app = FastAPI(title="Steps Challenge API", version="1.0.0", lifespan=lifespan)
 
 
 # Configure CORS
