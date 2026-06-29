@@ -15,14 +15,18 @@ models.Base.metadata.create_all(bind=engine)
 
 # Run safe migrations for any new columns added after initial deploy
 def run_migrations():
-    with engine.connect() as conn:
-        conn.execute(text(
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_approved BOOLEAN NOT NULL DEFAULT FALSE"
-        ))
-        conn.execute(text(
-            "UPDATE users SET is_approved = TRUE WHERE is_admin = TRUE AND is_approved = FALSE"
-        ))
-        conn.commit()
+    try:
+        with engine.connect() as conn:
+            conn.execute(text(
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_approved BOOLEAN NOT NULL DEFAULT FALSE"
+            ))
+            conn.execute(text(
+                "UPDATE users SET is_approved = TRUE WHERE is_admin = TRUE AND is_approved = FALSE"
+            ))
+            conn.commit()
+        print("Migrations completed successfully")
+    except Exception as e:
+        print(f"Migration warning (non-fatal): {e}")
 
 run_migrations()
 
