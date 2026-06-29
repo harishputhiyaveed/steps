@@ -54,6 +54,7 @@ app.add_middleware(
         "http://localhost:5174",
         "https://steps-tan-ten.vercel.app",
         "https://steps-hs23.vercel.app",
+        "https://charirty-steps.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
