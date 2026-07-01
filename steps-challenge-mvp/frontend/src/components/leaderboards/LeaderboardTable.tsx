@@ -145,12 +145,6 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
         </table>
       </div>
 
-      {/* View Full Leaderboard link */}
-      <div style={{ borderTop: '1px solid #e5e7eb', padding: '14px 20px', textAlign: 'center', backgroundColor: WHITE }}>
-        <span style={{ color: PURPLE, fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}>
-          View Full Leaderboard
-        </span>
-      </div>
     </div>
   );
 };
