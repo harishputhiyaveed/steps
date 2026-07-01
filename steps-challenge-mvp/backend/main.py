@@ -45,6 +45,17 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Steps Challenge API", version="1.0.0", lifespan=lifespan)
 
 
+# ONE-TIME TEAM FIX — remove after use
+@app.post("/api/fix-admin-team")
+def fix_admin_team(db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == "admin@test.ibm.com").first()
+    if not user:
+        return {"message": "User not found"}
+    user.team_name = "Overarching"
+    db.commit()
+    return {"message": f"Team updated to {user.team_name}"}
+
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
