@@ -123,6 +123,31 @@ const UserDashboard: React.FC = () => {
 
           {/* RIGHT — forms + leaderboards */}
           <div style={{ flex: '1 1 340px', minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+            {/* Photo Wall Banner */}
+            <div style={{ backgroundColor: '#eef0ff', borderRadius: '16px', padding: '20px 24px', position: 'relative', overflow: 'hidden', border: '1px solid #d4d8ff' }}>
+              {/* NEW! badge */}
+              <span style={{ display: 'inline-block', backgroundColor: PURPLE, color: '#ffffff', fontSize: '0.7rem', fontWeight: 800, padding: '3px 10px', borderRadius: '6px', letterSpacing: '0.05em', marginBottom: '10px' }}>NEW!</span>
+              {/* Headline */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px' }}>
+                <div>
+                  <p style={{ fontSize: '1.6rem', fontWeight: 800, color: '#1a1a2e', margin: '0 0 2px', lineHeight: 1.15 }}>Upload your</p>
+                  <p style={{ fontSize: '1.6rem', fontWeight: 800, color: PURPLE, margin: '0 0 12px', lineHeight: 1.15 }}>walks! 🚶</p>
+                </div>
+                {/* Camera icon */}
+                <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" fill="none" viewBox="0 0 24 24" stroke={PURPLE} strokeWidth={1.4} style={{ flexShrink: 0, opacity: 0.85 }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              {/* Divider */}
+              <div style={{ height: '2px', background: `linear-gradient(to right, ${PURPLE}, transparent)`, marginBottom: '12px', borderRadius: '999px' }} />
+              {/* Body text */}
+              <p style={{ fontSize: '0.875rem', color: '#374151', margin: 0, lineHeight: 1.6 }}>
+                You can now upload photos from your walks to our photo wall — <strong style={{ color: PURPLE }}>the best picture also wins a prize!</strong>
+              </p>
+            </div>
+
             <StepEntryForm onSuccess={handleStepAdded} />
             <UserStats refreshTrigger={refreshTrigger} />
             <PhotoUpload onSuccess={handleStepAdded} />
