@@ -7,10 +7,17 @@ const WHITE = '#ffffff';
 const BLACK = '#000000';
 const INTERVAL = 30000;
 
-const PhotoCarousel: React.FC = () => {
+interface PhotoCarouselProps {
+  currentUserId?: number;
+  isAdmin?: boolean;
+  onDelete?: () => void;
+}
+
+const PhotoCarousel: React.FC<PhotoCarouselProps> = ({ currentUserId, isAdmin, onDelete }) => {
   const [photos, setPhotos] = useState<PhotoEntry[]>([]);
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchPhotos = async () => {
@@ -24,9 +31,7 @@ const PhotoCarousel: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    fetchPhotos();
-  }, []);
+  useEffect(() => { fetchPhotos(); }, []);
 
   useEffect(() => {
     if (photos.length <= 1) return;
@@ -44,10 +49,27 @@ const PhotoCarousel: React.FC = () => {
     }, INTERVAL);
   };
 
+  const handleDelete = async () => {
+    if (!confirm('Delete this photo?')) return;
+    setDeleting(true);
+    try {
+      await photoAPI.deletePhoto(photos[current].id);
+      const updated = photos.filter((_, i) => i !== current);
+      setPhotos(updated);
+      setCurrent(prev => Math.min(prev, updated.length - 1));
+      if (onDelete) onDelete();
+    } catch {
+      alert('Failed to delete photo');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) return null;
   if (photos.length === 0) return null;
 
   const photo = photos[current];
+  const canDelete = isAdmin || currentUserId === photo.user_id;
 
   return (
     <div style={{ backgroundColor: WHITE, borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', overflow: 'hidden', width: '100%' }}>
@@ -68,14 +90,25 @@ const PhotoCarousel: React.FC = () => {
         />
       </div>
 
-      {/* Caption + uploader */}
-      <div style={{ padding: '14px 20px', borderTop: '1px solid #f3f4f6' }}>
-        {photo.caption && (
-          <p style={{ fontSize: '0.95rem', color: BLACK, margin: '0 0 6px', fontStyle: 'italic' }}>"{photo.caption}"</p>
+      {/* Caption + uploader + delete */}
+      <div style={{ padding: '14px 20px', borderTop: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          {photo.caption && (
+            <p style={{ fontSize: '0.95rem', color: BLACK, margin: '0 0 6px', fontStyle: 'italic' }}>"{photo.caption}"</p>
+          )}
+          <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: 0 }}>
+            Uploaded by <strong style={{ color: PURPLE }}>{photo.full_name}</strong>
+          </p>
+        </div>
+        {canDelete && (
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            style={{ backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '8px', padding: '6px 12px', fontSize: '0.8rem', fontWeight: 600, cursor: deleting ? 'not-allowed' : 'pointer', opacity: deleting ? 0.6 : 1, whiteSpace: 'nowrap', marginLeft: '12px' }}
+          >
+            {deleting ? 'Deleting…' : '🗑 Delete'}
+          </button>
         )}
-        <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: 0 }}>
-          Uploaded by <strong style={{ color: PURPLE }}>{photo.full_name}</strong>
-        </p>
       </div>
 
       {/* Dot navigation */}

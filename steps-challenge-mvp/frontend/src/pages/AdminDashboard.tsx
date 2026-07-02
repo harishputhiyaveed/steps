@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { adminAPI } from '../services/api';
 import { formatNumber } from '../utils/formatters';
 import type { AdminUser, AdminStats, StepEntry } from '../types';
+import PhotoCarousel from '../components/photos/PhotoCarousel';
 import charityWeekLogo from '../assets/Charity Week Logo.png';
 
 const PURPLE = '#4B3B8C';
@@ -198,6 +199,9 @@ const AdminDashboard: React.FC = () => {
           <div style={{ textAlign: 'center', padding: '60px', color: '#9ca3af', fontSize: '0.875rem' }}>Loading admin data…</div>
         ) : (
           <>
+            {/* Photo Wall — admin can delete any photo */}
+            <PhotoCarousel isAdmin={true} />
+
             {/* Stats Cards */}
             {stats && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>

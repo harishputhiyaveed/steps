@@ -6,6 +6,7 @@ import UserStats from '../components/dashboard/UserStats';
 import MyEntries from '../components/dashboard/MyEntries';
 import LeaderboardTable from '../components/leaderboards/LeaderboardTable';
 import PhotoUpload from '../components/photos/PhotoUpload';
+import PhotoCarousel from '../components/photos/PhotoCarousel';
 import { leaderboardsAPI } from '../services/api';
 import charityWeekLogo from '../assets/Charity Week Logo.png';
 
@@ -125,6 +126,7 @@ const UserDashboard: React.FC = () => {
             <StepEntryForm onSuccess={handleStepAdded} />
             <UserStats refreshTrigger={refreshTrigger} />
             <PhotoUpload onSuccess={handleStepAdded} />
+            <PhotoCarousel currentUserId={user?.id} isAdmin={user?.is_admin} onDelete={handleStepAdded} />
             <LeaderboardTable type="users" autoRefresh={true} refreshInterval={60000} refreshTrigger={refreshTrigger} />
             <LeaderboardTable type="teams" autoRefresh={true} refreshInterval={60000} refreshTrigger={refreshTrigger} />
           </div>
