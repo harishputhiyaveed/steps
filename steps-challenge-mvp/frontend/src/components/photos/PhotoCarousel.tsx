@@ -5,7 +5,7 @@ import type { PhotoEntry } from '../../types';
 const PURPLE = '#4B3B8C';
 const WHITE = '#ffffff';
 const BLACK = '#000000';
-const INTERVAL = 30000;
+const INTERVAL = 10000;
 
 interface PhotoCarouselProps {
   currentUserId?: number;
