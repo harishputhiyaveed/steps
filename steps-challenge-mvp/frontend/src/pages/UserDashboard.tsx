@@ -5,6 +5,7 @@ import StepEntryForm from '../components/dashboard/StepEntryForm';
 import UserStats from '../components/dashboard/UserStats';
 import MyEntries from '../components/dashboard/MyEntries';
 import LeaderboardTable from '../components/leaderboards/LeaderboardTable';
+import PhotoUpload from '../components/photos/PhotoUpload';
 import { leaderboardsAPI } from '../services/api';
 import charityWeekLogo from '../assets/Charity Week Logo.png';
 
@@ -123,6 +124,7 @@ const UserDashboard: React.FC = () => {
           <div style={{ flex: '1 1 340px', minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <StepEntryForm onSuccess={handleStepAdded} />
             <UserStats refreshTrigger={refreshTrigger} />
+            <PhotoUpload onSuccess={handleStepAdded} />
             <LeaderboardTable type="users" autoRefresh={true} refreshInterval={60000} refreshTrigger={refreshTrigger} />
             <LeaderboardTable type="teams" autoRefresh={true} refreshInterval={60000} refreshTrigger={refreshTrigger} />
           </div>

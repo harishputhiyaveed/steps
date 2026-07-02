@@ -1,16 +1,30 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func, text
 from contextlib import asynccontextmanager
 from datetime import timedelta
-from typing import List
+from typing import List, Optional
 import time
+import os
+import cloudinary
+import cloudinary.uploader
 import models
 import schemas
 import auth
 import admin
 from database import engine, get_db
+
+# Configure Cloudinary
+cloudinary.config(
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME", "wfgnkrgz"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY", "925533713692697"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET", "pibhe0h01BHIMlaVOBbWFv1rb4g"),
+)
+
+ALLOWED_TYPES = {"image/jpeg", "image/png", "image/tiff"}
+MIN_SIZE = 10 * 1024        # 10 KB
+MAX_SIZE = 1 * 1024 * 1024  # 1 MB
 
 
 def init_db():
@@ -322,6 +336,102 @@ def get_user_stats(
         user_rank=user_rank,
         team_rank=team_rank
     )
+
+
+# ============================================================================
+# PHOTO WALL ENDPOINTS
+# ============================================================================
+
+@app.post("/api/photos", response_model=schemas.PhotoEntryResponse, status_code=status.HTTP_201_CREATED)
+async def upload_photo(
+    file: UploadFile = File(...),
+    caption: Optional[str] = Form(None),
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Upload a photo to the photo wall"""
+    # Validate content type
+    if file.content_type not in ALLOWED_TYPES:
+        raise HTTPException(status_code=400, detail="Only JPEG, PNG and TIFF images are allowed")
+
+    # Read file and validate size
+    contents = await file.read()
+    size = len(contents)
+    if size < MIN_SIZE:
+        raise HTTPException(status_code=400, detail="Image must be larger than 10 KB")
+    if size > MAX_SIZE:
+        raise HTTPException(status_code=400, detail="Image must be smaller than 1 MB")
+
+    # Upload to Cloudinary
+    try:
+        result = cloudinary.uploader.upload(
+            contents,
+            folder="charity-steps",
+            resource_type="image",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+    # Save to DB
+    photo = models.PhotoEntry(
+        user_id=current_user.id,
+        image_url=result["secure_url"],
+        public_id=result["public_id"],
+        caption=caption,
+    )
+    db.add(photo)
+    db.commit()
+    db.refresh(photo)
+
+    return {
+        "id": photo.id,
+        "user_id": photo.user_id,
+        "image_url": photo.image_url,
+        "caption": photo.caption,
+        "full_name": current_user.full_name,
+        "created_at": photo.created_at,
+    }
+
+
+@app.get("/api/photos", response_model=List[schemas.PhotoEntryResponse])
+def get_photos(db: Session = Depends(get_db)):
+    """Get all photos for the carousel (public)"""
+    photos = db.query(models.PhotoEntry, models.User.full_name)\
+        .join(models.User)\
+        .order_by(models.PhotoEntry.created_at.desc())\
+        .all()
+    return [
+        {
+            "id": p.id,
+            "user_id": p.user_id,
+            "image_url": p.image_url,
+            "caption": p.caption,
+            "full_name": full_name,
+            "created_at": p.created_at,
+        }
+        for p, full_name in photos
+    ]
+
+
+@app.delete("/api/photos/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_photo(
+    photo_id: int,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a photo — owner or admin only"""
+    photo = db.query(models.PhotoEntry).filter(models.PhotoEntry.id == photo_id).first()
+    if not photo:
+        raise HTTPException(status_code=404, detail="Photo not found")
+    if photo.user_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Not authorised to delete this photo")
+    try:
+        cloudinary.uploader.destroy(photo.public_id)
+    except Exception:
+        pass  # still delete from DB even if Cloudinary fails
+    db.delete(photo)
+    db.commit()
+    return None
 
 
 # ============================================================================

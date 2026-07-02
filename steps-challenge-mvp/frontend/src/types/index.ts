@@ -83,6 +83,16 @@ export interface UserStats {
   team_rank: number;
 }
 
+// Photo
+export interface PhotoEntry {
+  id: number;
+  user_id: number;
+  image_url: string;
+  caption: string | null;
+  full_name: string;
+  created_at: string;
+}
+
 // Auth Context
 export interface AuthContextType {
   user: User | null;

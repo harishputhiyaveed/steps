@@ -11,6 +11,7 @@ import type {
   UserStats,
   AdminUser,
   AdminStats,
+  PhotoEntry,
 } from '../types';
 
 const API_URL = 'https://steps-production.up.railway.app';
@@ -133,6 +134,28 @@ export const adminAPI = {
   getStats: async (): Promise<AdminStats> => {
     const response = await api.get<AdminStats>('/api/admin/stats');
     return response.data;
+  },
+};
+
+// Photo API
+export const photoAPI = {
+  uploadPhoto: async (file: File, caption: string): Promise<PhotoEntry> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (caption) formData.append('caption', caption);
+    const response = await api.post<PhotoEntry>('/api/photos', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  getPhotos: async (): Promise<PhotoEntry[]> => {
+    const response = await api.get<PhotoEntry[]>('/api/photos');
+    return response.data;
+  },
+
+  deletePhoto: async (photoId: number): Promise<void> => {
+    await api.delete(`/api/photos/${photoId}`);
   },
 };
 

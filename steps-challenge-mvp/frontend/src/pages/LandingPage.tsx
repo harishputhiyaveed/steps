@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import RegisterForm from '../components/auth/RegisterForm';
 import LoginForm from '../components/auth/LoginForm';
 import LeaderboardTable from '../components/leaderboards/LeaderboardTable';
+import PhotoCarousel from '../components/photos/PhotoCarousel';
 import { leaderboardsAPI } from '../services/api';
 import charityWeekLogo from '../assets/Charity Week Logo.png';
 
@@ -107,6 +108,7 @@ const LandingPage: React.FC = () => {
             ) : (
               <LoginForm onSwitchToRegister={() => setAuthView('register')} />
             )}
+            <PhotoCarousel />
             <LeaderboardTable type="users" autoRefresh={true} refreshInterval={60000} />
             <LeaderboardTable type="teams" autoRefresh={true} refreshInterval={60000} />
           </div>

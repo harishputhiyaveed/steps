@@ -16,8 +16,22 @@ class User(Base):
     is_approved = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relationship to step entries
+    # Relationships
     step_entries = relationship("StepEntry", back_populates="user", cascade="all, delete-orphan")
+    photo_entries = relationship("PhotoEntry", back_populates="user", cascade="all, delete-orphan")
+
+
+class PhotoEntry(Base):
+    __tablename__ = "photo_entries"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    image_url = Column(String, nullable=False)
+    public_id = Column(String, nullable=False)  # Cloudinary public_id for deletion
+    caption = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="photo_entries")
 
 
 class StepEntry(Base):

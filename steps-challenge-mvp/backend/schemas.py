@@ -92,4 +92,16 @@ class UserStats(BaseModel):
     user_rank: int
     team_rank: int
 
+# Photo Schemas
+class PhotoEntryResponse(BaseModel):
+    id: int
+    user_id: int
+    image_url: str
+    caption: Optional[str]
+    full_name: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
 # Made with Bob
