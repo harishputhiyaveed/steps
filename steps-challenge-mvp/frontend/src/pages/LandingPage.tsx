@@ -99,6 +99,9 @@ const LandingPage: React.FC = () => {
               </div>
 
             </div>
+
+            {/* Team Leaderboard below the card */}
+            <LeaderboardTable type="teams" autoRefresh={true} refreshInterval={60000} />
           </div>
 
           {/* RIGHT — auth form + leaderboards */}
@@ -130,7 +133,6 @@ const LandingPage: React.FC = () => {
             )}
             <PhotoCarousel />
             <LeaderboardTable type="users" autoRefresh={true} refreshInterval={60000} />
-            <LeaderboardTable type="teams" autoRefresh={true} refreshInterval={60000} />
           </div>
 
         </div>

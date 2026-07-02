@@ -119,6 +119,9 @@ const UserDashboard: React.FC = () => {
               </div>
 
             </div>
+
+            {/* Team Leaderboard below the card */}
+            <LeaderboardTable type="teams" autoRefresh={true} refreshInterval={60000} refreshTrigger={refreshTrigger} />
           </div>
 
           {/* RIGHT — forms + leaderboards */}
@@ -153,7 +156,6 @@ const UserDashboard: React.FC = () => {
             <PhotoUpload onSuccess={handleStepAdded} />
             <PhotoCarousel currentUserId={user?.id} isAdmin={user?.is_admin} onDelete={handleStepAdded} />
             <LeaderboardTable type="users" autoRefresh={true} refreshInterval={60000} refreshTrigger={refreshTrigger} />
-            <LeaderboardTable type="teams" autoRefresh={true} refreshInterval={60000} refreshTrigger={refreshTrigger} />
           </div>
 
         </div>
