@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { photoAPI } from '../../services/api';
 
 const PURPLE = '#4B3B8C';
@@ -28,7 +28,6 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onSuccess }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const ALLOWED = ['image/jpeg', 'image/png', 'image/tiff'];
   const MIN = 10 * 1024;
@@ -57,7 +56,6 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onSuccess }) => {
       setFile(null);
       setPreview(null);
       setCaption('');
-      if (fileInputRef.current) fileInputRef.current.value = '';
       onSuccess();
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Upload failed');
@@ -85,28 +83,31 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onSuccess }) => {
             </div>
           )}
 
-          {/* File picker */}
           <div>
             <label style={{ display: 'block', fontWeight: 700, fontSize: '0.875rem', color: BLACK, marginBottom: '6px' }}>
               Photo <span style={{ fontWeight: 400, color: '#6b7280' }}>(JPEG, PNG or TIFF · 10 KB – 1 MB)</span>
             </label>
-            <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.tif,.tiff" onChange={handleFileChange} style={inputStyle} />
+            <input type="file" accept=".jpg,.jpeg,.png,.tif,.tiff" onChange={handleFileChange} style={inputStyle} />
           </div>
 
-          {/* Preview */}
           {preview && (
             <div style={{ textAlign: 'center' }}>
               <img src={preview} alt="Preview" style={{ maxHeight: '160px', maxWidth: '100%', borderRadius: '10px', objectFit: 'contain', border: '1px solid #e5e7eb' }} />
             </div>
           )}
 
-          {/* Caption */}
           <div>
-            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.875rem', color: BLACK, marginBottom: '6px' }}>Caption <span style={{ fontWeight: 400, color: '#6b7280' }}>(optional)</span></label>
+            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.875rem', color: BLACK, marginBottom: '6px' }}>
+              Caption <span style={{ fontWeight: 400, color: '#6b7280' }}>(optional)</span>
+            </label>
             <input type="text" value={caption} onChange={e => setCaption(e.target.value)} maxLength={200} style={inputStyle} placeholder="Add a caption…" />
           </div>
 
-          <button type="submit" disabled={loading || !file} style={{ width: '100%', padding: '11px', borderRadius: '10px', backgroundColor: PURPLE, color: WHITE, fontSize: '0.875rem', fontWeight: 600, border: 'none', cursor: loading || !file ? 'not-allowed' : 'pointer', opacity: loading || !file ? 0.6 : 1 }}>
+          <button
+            type="submit"
+            disabled={loading || !file}
+            style={{ width: '100%', padding: '11px', borderRadius: '10px', backgroundColor: PURPLE, color: WHITE, fontSize: '0.875rem', fontWeight: 600, border: 'none', cursor: loading || !file ? 'not-allowed' : 'pointer', opacity: loading || !file ? 0.6 : 1 }}
+          >
             {loading ? 'Uploading…' : 'Upload Photo'}
           </button>
         </form>
