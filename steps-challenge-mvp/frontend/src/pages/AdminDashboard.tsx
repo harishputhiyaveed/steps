@@ -55,6 +55,7 @@ const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [userEntries, setUserEntries] = useState<StepEntry[]>([]);
@@ -128,6 +129,17 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleDownloadExcel = async () => {
+    setExporting(true);
+    try {
+      await adminAPI.downloadExcel();
+    } catch (err: any) {
+      alert('Failed to export Excel. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const closeModal = () => {
     setShowEntriesModal(false);
     setSelectedUser(null);
@@ -176,6 +188,13 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={handleDownloadExcel}
+              disabled={exporting}
+              style={{ backgroundColor: '#16a34a', color: WHITE, padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: exporting ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontWeight: 600, opacity: exporting ? 0.7 : 1 }}
+            >
+              {exporting ? 'Exporting…' : '⬇ Download Excel'}
+            </button>
             <button onClick={() => navigate('/dashboard')} style={{ backgroundColor: '#6b7280', color: WHITE, padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600 }}>
               User Dashboard
             </button>

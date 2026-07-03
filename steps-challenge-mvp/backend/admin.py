@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
+import io
 import models
 import schemas
 from database import get_db
@@ -159,5 +161,96 @@ def get_admin_stats(
             "Data", "CSP Legacy", "Not Listed",
         ]
     }
+
+
+@router.get("/export/excel")
+def export_excel(
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(require_admin)
+):
+    """Export all users and step entries as an Excel workbook (admin only)"""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.utils import get_column_letter
+
+    wb = Workbook()
+
+    # ── Sheet 1: Users Summary ──────────────────────────────────────────────
+    ws_users = wb.active
+    ws_users.title = "Users"
+
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(fill_type="solid", fgColor="4B3B8C")
+    center = Alignment(horizontal="center")
+
+    user_headers = ["ID", "Full Name", "Email", "Team", "Total Steps", "Role", "Status", "Registered"]
+    for col_idx, header in enumerate(user_headers, start=1):
+        cell = ws_users.cell(row=1, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+
+    users_data = db.query(
+        models.User,
+        func.coalesce(func.sum(models.StepEntry.steps), 0).label("total_steps")
+    ).outerjoin(models.StepEntry).group_by(models.User.id).order_by(
+        func.coalesce(func.sum(models.StepEntry.steps), 0).desc()
+    ).all()
+
+    for row_idx, (user, total_steps) in enumerate(users_data, start=2):
+        ws_users.cell(row=row_idx, column=1, value=user.id)
+        ws_users.cell(row=row_idx, column=2, value=user.full_name)
+        ws_users.cell(row=row_idx, column=3, value=user.email)
+        ws_users.cell(row=row_idx, column=4, value=user.team_name)
+        ws_users.cell(row=row_idx, column=5, value=int(total_steps))
+        ws_users.cell(row=row_idx, column=6, value="Admin" if user.is_admin else "User")
+        ws_users.cell(row=row_idx, column=7, value="Approved" if (user.is_approved or user.is_admin) else "Pending")
+        ws_users.cell(row=row_idx, column=8, value=user.created_at.strftime("%Y-%m-%d %H:%M") if user.created_at else "")
+
+    # Auto-size columns
+    col_widths = [6, 28, 35, 22, 14, 8, 10, 18]
+    for i, width in enumerate(col_widths, start=1):
+        ws_users.column_dimensions[get_column_letter(i)].width = width
+
+    # ── Sheet 2: All Step Entries ───────────────────────────────────────────
+    ws_steps = wb.create_sheet(title="Step Entries")
+
+    step_headers = ["Entry ID", "User ID", "Full Name", "Team", "Date", "Steps", "Logged At"]
+    for col_idx, header in enumerate(step_headers, start=1):
+        cell = ws_steps.cell(row=1, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center
+
+    entries = (
+        db.query(models.StepEntry, models.User)
+        .join(models.User, models.StepEntry.user_id == models.User.id)
+        .order_by(models.StepEntry.date.desc())
+        .all()
+    )
+
+    for row_idx, (entry, user) in enumerate(entries, start=2):
+        ws_steps.cell(row=row_idx, column=1, value=entry.id)
+        ws_steps.cell(row=row_idx, column=2, value=user.id)
+        ws_steps.cell(row=row_idx, column=3, value=user.full_name)
+        ws_steps.cell(row=row_idx, column=4, value=user.team_name)
+        ws_steps.cell(row=row_idx, column=5, value=entry.date.strftime("%Y-%m-%d") if entry.date else "")
+        ws_steps.cell(row=row_idx, column=6, value=entry.steps)
+        ws_steps.cell(row=row_idx, column=7, value=entry.created_at.strftime("%Y-%m-%d %H:%M") if entry.created_at else "")
+
+    step_col_widths = [10, 8, 28, 22, 12, 12, 18]
+    for i, width in enumerate(step_col_widths, start=1):
+        ws_steps.column_dimensions[get_column_letter(i)].width = width
+
+    # ── Stream response ─────────────────────────────────────────────────────
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=steps_challenge_export.xlsx"}
+    )
 
 # Made with Bob

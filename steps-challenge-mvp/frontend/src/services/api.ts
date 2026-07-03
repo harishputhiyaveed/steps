@@ -135,6 +135,21 @@ export const adminAPI = {
     const response = await api.get<AdminStats>('/api/admin/stats');
     return response.data;
   },
+
+  downloadExcel: async (): Promise<void> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/api/admin/export/excel`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('Export failed');
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'steps_challenge_export.xlsx';
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 };
 
 // Photo API
