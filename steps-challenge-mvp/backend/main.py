@@ -24,7 +24,7 @@ cloudinary.config(
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/tiff"}
 MIN_SIZE = 10 * 1024        # 10 KB
-MAX_SIZE = 1 * 1024 * 1024  # 1 MB
+MAX_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
 def init_db():
@@ -360,7 +360,7 @@ async def upload_photo(
     if size < MIN_SIZE:
         raise HTTPException(status_code=400, detail="Image must be larger than 10 KB")
     if size > MAX_SIZE:
-        raise HTTPException(status_code=400, detail="Image must be smaller than 1 MB")
+        raise HTTPException(status_code=400, detail="Image must be smaller than 10 MB")
 
     # Upload to Cloudinary
     try:

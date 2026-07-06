@@ -31,7 +31,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onSuccess }) => {
 
   const ALLOWED = ['image/jpeg', 'image/png', 'image/tiff'];
   const MIN = 10 * 1024;
-  const MAX = 1 * 1024 * 1024;
+  const MAX = 10 * 1024 * 1024;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -40,7 +40,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onSuccess }) => {
     setSuccess(false);
     if (!ALLOWED.includes(f.type)) { setError('Only JPEG, PNG and TIFF images are allowed'); return; }
     if (f.size < MIN) { setError('Image must be larger than 10 KB'); return; }
-    if (f.size > MAX) { setError('Image must be smaller than 1 MB'); return; }
+    if (f.size > MAX) { setError('Image must be smaller than 10 MB'); return; }
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
@@ -85,7 +85,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onSuccess }) => {
 
           <div>
             <label style={{ display: 'block', fontWeight: 700, fontSize: '0.875rem', color: BLACK, marginBottom: '6px' }}>
-              Photo <span style={{ fontWeight: 400, color: '#6b7280' }}>(JPEG, PNG or TIFF · 10 KB – 1 MB)</span>
+              Photo <span style={{ fontWeight: 400, color: '#6b7280' }}>(JPEG, PNG or TIFF · 10 KB – 10 MB)</span>
             </label>
             <input type="file" accept=".jpg,.jpeg,.png,.tif,.tiff" onChange={handleFileChange} style={inputStyle} />
           </div>
