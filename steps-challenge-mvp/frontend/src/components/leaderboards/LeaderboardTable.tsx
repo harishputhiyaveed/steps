@@ -10,7 +10,8 @@ interface LeaderboardTableProps {
   refreshTrigger?: number;
 }
 
-const TOP_N = 10;
+const TOP_N_USERS = 25;
+const TOP_N_TEAMS = 10;
 const PURPLE = '#4B3B8C';
 const BLACK = '#000000';
 const WHITE = '#ffffff';
@@ -83,7 +84,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
 
   const title = type === 'users' ? 'Individual Leaderboard' : 'Team Leaderboard';
   const nameHeader = type === 'users' ? 'User Name' : 'Team Name';
-  const rows = type === 'users' ? userLeaderboard.slice(0, TOP_N) : teamLeaderboard.slice(0, TOP_N);
+  const rows = type === 'users' ? userLeaderboard.slice(0, TOP_N_USERS) : teamLeaderboard.slice(0, TOP_N_TEAMS);
 
   return (
     <div style={{ backgroundColor: WHITE, borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.10)', width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
