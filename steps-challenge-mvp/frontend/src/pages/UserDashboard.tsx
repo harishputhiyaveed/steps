@@ -48,7 +48,7 @@ const UserDashboard: React.FC = () => {
     <div style={{ minHeight: '100vh', backgroundColor: '#f1f5f9' }}>
 
       {/* Extension Banner */}
-      <div style={{ backgroundColor: '#7c3aed', color: WHITE, textAlign: 'center', padding: '10px 24px', fontSize: '0.9rem', fontWeight: 600, letterSpacing: '0.01em' }}>
+      <div style={{ backgroundColor: '#7c3aed', color: WHITE, textAlign: 'center', padding: '30px 24px', fontSize: '2.7rem', fontWeight: 600, letterSpacing: '0.01em' }}>
         📣 We are now extending the Steps Challenge to <strong>20th July at 6 PM UK Time</strong> — keep stepping! 🏃
       </div>
 
