@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
 import io
+import requests as http_requests
 import models
 import schemas
 from database import get_db
@@ -251,6 +252,103 @@ def export_excel(
         output,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": "attachment; filename=steps_challenge_export.xlsx"}
+    )
+
+@router.get("/export/photos-pdf")
+def export_photos_pdf(
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(require_admin)
+):
+    """Export all photos as a PDF (one photo per page, caption + uploader below) — admin only"""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import cm
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Image, Paragraph, Spacer, PageBreak
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.enums import TA_CENTER
+
+    photos = db.query(models.PhotoEntry, models.User).join(
+        models.User, models.PhotoEntry.user_id == models.User.id
+    ).order_by(models.PhotoEntry.created_at.asc()).all()
+
+    if not photos:
+        raise HTTPException(status_code=404, detail="No photos found")
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=A4,
+        leftMargin=1.5 * cm,
+        rightMargin=1.5 * cm,
+        topMargin=1.5 * cm,
+        bottomMargin=1.5 * cm,
+    )
+
+    styles = getSampleStyleSheet()
+    caption_style = ParagraphStyle(
+        "caption",
+        parent=styles["Normal"],
+        fontSize=13,
+        leading=18,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#1f2328"),
+        fontName="Helvetica-Oblique",
+    )
+    uploader_style = ParagraphStyle(
+        "uploader",
+        parent=styles["Normal"],
+        fontSize=11,
+        leading=15,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#4B3B8C"),
+        fontName="Helvetica-Bold",
+    )
+
+    page_w = A4[0] - 3 * cm   # usable width
+    page_h = A4[1] - 6 * cm   # usable height (leave room for text)
+    max_img_h = page_h - 3 * cm
+
+    story = []
+    for idx, (photo, user) in enumerate(photos):
+        # Fetch image bytes
+        try:
+            resp = http_requests.get(photo.image_url, timeout=15)
+            resp.raise_for_status()
+        except Exception:
+            continue
+
+        img_buf = io.BytesIO(resp.content)
+        try:
+            img = Image(img_buf)
+        except Exception:
+            continue
+
+        # Scale to fit page while preserving aspect ratio
+        iw, ih = img.imageWidth, img.imageHeight
+        scale = min(page_w / iw, max_img_h / ih, 1.0)
+        img.drawWidth = iw * scale
+        img.drawHeight = ih * scale
+        img._hAlign = "CENTER"
+
+        story.append(img)
+        story.append(Spacer(1, 0.4 * cm))
+
+        if photo.caption:
+            story.append(Paragraph(f'"{photo.caption}"', caption_style))
+            story.append(Spacer(1, 0.2 * cm))
+
+        story.append(Paragraph(f"Uploaded by {user.full_name}", uploader_style))
+
+        if idx < len(photos) - 1:
+            story.append(PageBreak())
+
+    doc.build(story)
+    buf.seek(0)
+
+    return StreamingResponse(
+        buf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=steps_challenge_photos.pdf"}
     )
 
 # Made with Bob

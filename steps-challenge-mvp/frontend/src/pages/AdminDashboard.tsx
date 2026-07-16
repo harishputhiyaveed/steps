@@ -56,6 +56,7 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState(false);
+  const [exportingPDF, setExportingPDF] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [userEntries, setUserEntries] = useState<StepEntry[]>([]);
@@ -129,6 +130,17 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    setExportingPDF(true);
+    try {
+      await adminAPI.downloadPhotosPDF();
+    } catch {
+      alert('Failed to export PDF. Please try again.');
+    } finally {
+      setExportingPDF(false);
+    }
+  };
+
   const handleDownloadExcel = async () => {
     setExporting(true);
     try {
@@ -188,6 +200,13 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={handleDownloadPDF}
+              disabled={exportingPDF}
+              style={{ backgroundColor: '#0369a1', color: WHITE, padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: exportingPDF ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontWeight: 600, opacity: exportingPDF ? 0.7 : 1 }}
+            >
+              {exportingPDF ? 'Generating…' : '📄 Download Photos PDF'}
+            </button>
             <button
               onClick={handleDownloadExcel}
               disabled={exporting}

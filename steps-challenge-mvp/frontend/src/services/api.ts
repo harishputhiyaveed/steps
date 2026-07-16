@@ -136,6 +136,21 @@ export const adminAPI = {
     return response.data;
   },
 
+  downloadPhotosPDF: async (): Promise<void> => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/api/admin/export/photos-pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) throw new Error('PDF export failed');
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'steps_challenge_photos.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
+  },
+
   downloadExcel: async (): Promise<void> => {
     const token = localStorage.getItem('token');
     const response = await fetch(`${API_URL}/api/admin/export/excel`, {
